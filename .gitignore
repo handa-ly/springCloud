@@ -1,7 +1,0 @@
-/sc-f-chapter6/.idea/$CACHE_FILE$
-/eurekaserver/.gitignore
-/sc-f-chapter6/config-server/.gitignore
-/service-feign/.gitignore
-/service-hi/.gitignore
-/service-ribbon/.gitignore
-/service-zuul/.gitignore
