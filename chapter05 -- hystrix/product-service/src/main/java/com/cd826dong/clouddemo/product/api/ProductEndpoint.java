@@ -24,8 +24,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -80,5 +83,30 @@ public class ProductEndpoint {
     @RequestMapping(value = "/users",method = RequestMethod.GET)
     public List<UserDto> userList() {
         return this.userService.findAll();
+    }
+
+    /**
+     * FIXME: 测试atomic多线程问题
+     * 获取用户信息列表
+     * @return
+     */
+    @RequestMapping(value = "/multiThread",method = RequestMethod.GET)
+    public String multiThread() {
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(5,10,5,
+                TimeUnit.SECONDS, new ArrayBlockingQueue<>(10000));
+        List<Map<Long, AtomicInteger>> testList = new ArrayList<>();
+        Map<Long,AtomicInteger> map = new HashMap<>();
+        map.put(1L,new AtomicInteger(0));
+        testList.add(map);
+        for (int i =0;i<10000;i++){
+            executor.execute(()-> testList.forEach(test-> test.get(1L).incrementAndGet()));
+        }
+        executor.shutdown();
+        while (true){
+            if(executor.isTerminated()){
+                break;
+            }
+        }
+        return testList.get(0).get(1L).toString();
     }
 }
